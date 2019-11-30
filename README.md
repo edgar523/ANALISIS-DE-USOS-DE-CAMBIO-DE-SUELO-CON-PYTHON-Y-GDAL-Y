@@ -148,13 +148,108 @@ Y como resultado nos muestra en NDVI del 2014 y 2015.
       
 `plotNDVI(path_NDVI_2014,extentArray,0,'YlGn')`
 
-[https://drive.google.com/drive/u/0/folders/1lRnTgzln2YNbscz9WoY4Zqif_5CnwZmo]
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/2019%20nvi.png" />
+
+El comando para que se muestre el NVI del 2019 es el siguiente:
+
+`plotNDVI(path_NDVI_2019,extentArray,0,'YlGn')`
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/esta%20si%20es%20la%202014.png" />
+
+Ahora vamos a generar una imagen que en realidad sea el cambio de los NDVI’S. Una ima-gen que te muestre qué tanto NDVI ha cambia-do.
+Y lo guardaremos como RASTER.
+
+`ndviChange = ndvi2019-ndvi2014`
+
+ `ndviChange = np.where((ndvi2014>-999) & (ndvi2019>-999),ndviChange,-999)`
+ 
+ ` ndviChange`
+
+`saveRaster(ndviChange,path_NDVIChange_19_14,cols,rows,projection)`
+
+`plotNDVI(path_NDVIChange_19_14,extentArray,-0.5,'Spectral')`
+
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/resultado%20de%20las%20nvei.png" />
+
+Por ultimo vamos a generar las curvas de nivel, esto se puede hacer con opciones de gdal, no es necesario que lo hagas en QGIS, esto lo puedes hacer directamente desde Python, co-mo se ve a continuación:
+
+`Dataset_ndvi = gdal.Open(path_NDVIChange_19_14)#path_NDVI_2014`
+`ndvi_raster = Dataset_ndvi.GetRasterBand(1)`
+
+`ogr_ds = ogr.GetDriverByName("ESRI Shapefile").CreateDataSource(contours_NDVIChange_19_14)`
+
+`prj=Dataset_ndvi.GetProjectionRef()#GetProjection()`
+
+`srs = osr.SpatialReference(wkt=prj)#`
+`#srs.ImportFromProj4(prj)`
+
+`contour_shp = ogr_ds.CreateLayer('contour', srs)`
+
+ `field_defn = ogr.FieldDefn("ID", ogr.OFTInteger)`
+ 
+  `contour_shp.CreateField(field_defn)`
+  
+  `field_defn = ogr.FieldDefn("ndviChange", ogr.OFTReal)`
+  
+  `contour_shp.CreateField(field_defn)`
+  
+  Generate Contourlines
+  `gdal.ContourGenerate(ndvi_raster, 0.1, 0, [], 1, -999, contour_shp, 0, 1)`
+  
+ ` ogr_ds = None`
+ 
+ Posteriormente abriremos QGIS y vamos a co-locar el documento .SHP (shapefile) que creaste con anterioridad, primeramente le vamos a apli-car un filtro con clic derecho sobre el nombre, en filtrar y tiene que ser <0 Para que salgan puros números negativos. 
+
+<img src="<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/resultado%20de%20las%20nvei.png" />" />
+
+Por último guardamos el archivo resultante co-mo KML.
+
+La razón de por qué se cambió a KML es por-que se puede abrir con Google Earth, ya que tiene una forma rápida de ver fotos antiguas.
+Para finalizar buscamos el área de interés entre el terreno que exportamos a Google Earth y clicearemos en donde dice “Mostrar el historial de imágenes, Usar el deslizador de tiempo entre las fechas de adquisición” y así podremos ver el cambio del tipo de suelo que hay entre los años que se te ocurra, en este caso es de los años 2014 y 2019.
 
 
+## 3.MANEJO DE DATOS
+
+Los datos que manejaremos en este proyecto son     imagen Landsat 8, del 2014 y 2019 , que no son más que  índices de vegetación  de cada uno de los años, que las podemos obte-ner de  la página  oficial del   INEGI,  CONAGU  y SAGARPA.
+
+Las imagen corresponden al estado de Michoacan
+
+Imagenes landsat 2014
+
+<img src="<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/Image20140205clip/LC08_L1TP_029047_20140205_20170307_01_T1_B4_clip.TIF" />
 
 
+<img src="<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/Image20140205clip/LC08_L1TP_029047_20140205_20170307_01_T1_B5_clip.TIF"  />
+
+Imagenes landsat  2019.
+
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/Image20190203clip/LC08_L1TP_029047_20190203_20190206_01_T1_B4_clip.TIF" />
 
 
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/Image20190203clip/LC08_L1TP_029047_20190203_20190206_01_T1_B5_clip.TIF" />
+
+## 4. RESULTADOS
+
+Los resultados que se obtuvieron de este pro-grama fueron proseados en QGIS donde vamos a primero colar un filtro que nos permita sola-mente ver las zonas donde se nota un cambio, a continuación, se mostraran las dos imagen que se obtuvieron.
+
+Esta imagen ya plotiada del  NDVI del 2014 
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/antes.png" />
+
+Esta imagen ya plotiada del  NDVI del 2019 
+se puede ver en la parte con rojo el cambio que sufrio el citio.
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/despues.png" />
+
+A simple vista nose puede apreciar pero hay una zona donde se puede ver claramente que esa área a sufrido un cambio bastante grande donde seguramente sufrió de forestación.
+
+Esto lo pudimos obtener por las diferencias que tuvimos al  momento de comparar cada una de nuestras bandas de cada una de las imágenes.
+Se crea una imagen de cambio de uso de suelo basado en la diferencia de los NDVI del 2019 con el 2014. La imagen es exportada como un archivo Gtiff.
+
+<img src="https://github.com/edgar523/ANALISIS-DE-USOS-DE-CAMBIO-DE-SUELO-CON-PYTHON-Y-GDAL-Y/blob/master/resultado%20de%20las%20nvei.png" />
+
+Esta imagen esta en formato TIFF la cual será que utilizaremos para exportar a QGIS y crear nuestro archivo KML, que exportaremos a Goo-gle earth, el cual como cuenta con la capacidad de ver imagen viejas nos ayudara a localizar esta zonas afectadas y ver como se encuentran en la actualidad.
+
+## 5.CONCLUSIONES
+### Edgar Gabriel Rosales:
+este programa  podrá ser utilizad o para propó-sitos de  estudio de cambio y para consentirás sobre como va cambiando nuestro entorno y para determinar como lo   estamos afectando.
 
 
 
